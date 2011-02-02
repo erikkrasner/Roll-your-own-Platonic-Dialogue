@@ -51,16 +51,5 @@ def parse_standard_dialogue(file_name):
     dialogue.next()
     speakers_and_words = get_speakers_and_words(dialogue, speaker_list)
     return speakers_and_words
-    dialogue_string = ""
-    dialogue_list = []
-    for line in dialogue:
-        if line != '\n':
-            if dialogue_string:
-                dialogue_string += ' '
-            dialogue_string += line[:-1]
-        else:
-            dialogue_list.append(dialogue_string)
-            dialogue_string = ""
-    return dialogue_list
 
 standard_dialogues = ['cratylus', 'critias', 'crito', 'euthydemus', 'euthyphro', 'gorgias','ion','laches','meno', 'phaedrus', 'philebus','protagoras', 'sophist', 'statesman','theaetatus','timaeus']
