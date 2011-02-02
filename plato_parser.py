@@ -15,3 +15,5 @@ def parse_standard_dialogue(file_name):
             dialogue_list.append(dialogue_string)
             dialogue_string = ""
     return dialogue_list
+
+standard_dialogues = ['cratylus', 'critias', 'crito', 'euthydemus', 'euthyphro', 'gorgias','ion','laches','meno', 'phaedrus', 'philebus','protagoras', 'sophist', 'statesman','theaetatus','timaeus']
