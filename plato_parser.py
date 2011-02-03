@@ -42,8 +42,10 @@ def get_speakers_and_words(dialogue_file, speaker_list):
                     current_speech = line[speech_index:-1]
                     current_speaker = speaker_name
                 else:
+                    if current_speech[-1] != " ":
+                        current_speech += " "
                     current_speech += line[:-1]
-                    return speakers_and_words
+    return speakers_and_words
 
 def parse_standard_dialogue(file_name):
     dialogue = open(file_name,'r')
