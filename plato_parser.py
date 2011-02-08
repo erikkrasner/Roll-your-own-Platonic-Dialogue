@@ -62,12 +62,63 @@ def parse_standard_dialogue(file_name):
     return speakers_and_words
 
 class SequenceMarkovReader(MarkovReader):
-    pass
+    def __init__(self,corpus):
+        MarkovReader.__init__(self,corpus)
+        self.sequence_counts = {}
+    def read(self, string, order):
+        def count(word_tuple):
+            if word_tuple not in seen_already:
+                if word_tuple in self.sequence_counts:
+                    self.sequence_counts[word_tuple] += 1
+                else:
+                    self.sequence_counts[word_tuple] = 1
+                seen_already.add(word_tuple)
+                if word_tuple != ():
+                    count(word_tuple[1:])
+        words = self.tokenize(string)
+        seen_already = set()
+        word_tuple = ()
+        for word in words:
+            self.corpus.add(word_tuple, word)
+            count(word_tuple)
+            if len(word_tuple) < order:
+                word_tuple += word,
+            else: word_tuple = word_tuple[1:] + (word,)
+        for i in range(order):
+            self.corpus.add(word_tuple, word)
+            count(word_tuple)
+            word_tuple = word_tuple[1:]
+    def normalize_counts(self):
+        print self.sequence_counts
+        for row in self.corpus:
+            for word_tuple in row:
+                word_table = row[word_tuple]
+                count = self.sequence_counts[word_tuple]
+                for word in word_table:
+                    if word_table[word] % count == 0:
+                        word_table[word] /= count
+                    else:
+                        word_table[word] /= count
+                        word_table[word] += 1
 
 if __name__ == '__main__':
     standard_dialogues = ['cratylus', 'critias', 'crito', 'euthydemus', 'euthyphro', 'gorgias','ion','laches','meno', 'phaedrus', 'philebus','protagoras', 'sophist', 'statesman','theaetatus','timaeus']
     speaker_markovs = {}
+    speaker_markov_readers = {}
     sequence_markov = MarkovCorpus(3)
     sequence_markov_reader = SequenceMarkovReader(sequence_markov)
     for dialogue in standard_dialogues:
         speakers_and_words, speaker_sequence = parse_standard_dialogue("dialogues/%s.txt" % dialogue)
+        for speaker in speakers_and_words:
+            if speaker not in speaker_markovs:
+                speaker_markovs[speaker] = MarkovCorpus(4)
+                speaker_markov_readers[speaker] = MarkovReader(speaker_markovs[speaker])
+            for words in speakers_and_words[speaker]:
+                MarkovReader(speaker_markovs[speaker]).read(words,4)
+        sequence_markov_reader.read(speaker_sequence, 3)
+    sequence_markov_reader.normalize_counts()
+    sequence_file = open("datafiles/sequence.dat",'w')
+    pickle.dump(sequence_markov, sequence_file)
+    for speaker in speaker_markovs:
+        save_file = open("datafiles/%s.dat" % speaker,'w')
+        pickle.dump(speaker_markovs[speaker],save_file)
