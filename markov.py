@@ -10,17 +10,16 @@ import random
 # follow them. The lookup() function takes a tuple of words and returns
 # an associated word chosen according to the probability distribution.
 #######
-class MarkovCorpus:
+class MarkovCorpus(list):
     def __init__(self, order):
         self.order = order
-        self.data = []
         for i in range(order + 1):
-            self.data.append({})
+            self.append({})
     # Associate a sequence of words with the word that follows it.
     #  If the sequence is length n, for k=0..n-1 do the same for the last k
     #  words in the sequence.
     def add(self, word_tuple, word):
-        row = self.data[len(word_tuple)]
+        row = self[len(word_tuple)]
         if not word_tuple in row.keys():
             row[word_tuple] = {word:1}
         elif not word in row[word_tuple].keys():
@@ -34,7 +33,7 @@ class MarkovCorpus:
     #  Else return a random word associated with all but the first
     #  word in the tuple.
     def lookup(self, word_tuple):
-        row = self.data[len(word_tuple)]
+        row = self[len(word_tuple)]
         if (word_tuple == ()) | (word_tuple in row.keys()):
             return self.choose_randomly(word_tuple)
         if word_tuple[0] == "\0":
@@ -45,7 +44,7 @@ class MarkovCorpus:
     #  finding it in the original text.
     def choose_randomly(self, word_tuple):
         sum = 0
-        probs = self.data[len(word_tuple)][word_tuple]
+        probs = self[len(word_tuple)][word_tuple]
         for word, count in probs.iteritems():
             sum += count
         choice = random.randint(0,sum)

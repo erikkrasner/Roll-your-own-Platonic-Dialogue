@@ -1,3 +1,6 @@
+from markov import *
+import pickle
+
 def is_prefix(str1,str2):
     return len(str2) >= len(str1) and str2[:len(str1)].lower() == str1.lower()
 
@@ -29,6 +32,7 @@ def get_speakers_and_words(dialogue_file, speaker_list):
             return (speaker, dot_space_index + 2)
         return (None, None)
     speakers_and_words = {}
+    speaker_sequence = ""
     for speaker in speaker_list:
         speakers_and_words[speaker] = []
         current_speech = ""
@@ -39,6 +43,9 @@ def get_speakers_and_words(dialogue_file, speaker_list):
                 if speaker_name:
                     if current_speaker:
                         speakers_and_words[current_speaker].append(current_speech)
+                        speaker_sequence += " " + current_speaker
+                    else:
+                        speaker_sequence = current_speaker
                     current_speech = line[speech_index:-1]
                     current_speaker = speaker_name
                 else:
@@ -54,4 +61,13 @@ def parse_standard_dialogue(file_name):
     speakers_and_words = get_speakers_and_words(dialogue, speaker_list)
     return speakers_and_words
 
-standard_dialogues = ['cratylus', 'critias', 'crito', 'euthydemus', 'euthyphro', 'gorgias','ion','laches','meno', 'phaedrus', 'philebus','protagoras', 'sophist', 'statesman','theaetatus','timaeus']
+class SequenceMarkovReader(MarkovReader):
+    pass
+
+if __name__ == '__main__':
+    standard_dialogues = ['cratylus', 'critias', 'crito', 'euthydemus', 'euthyphro', 'gorgias','ion','laches','meno', 'phaedrus', 'philebus','protagoras', 'sophist', 'statesman','theaetatus','timaeus']
+    speaker_markovs = {}
+    sequence_markov = MarkovCorpus(3)
+    sequence_markov_reader = SequenceMarkovReader(sequence_markov)
+    for dialogue in standard_dialogues:
+        speakers_and_words, speaker_sequence = parse_standard_dialogue("dialogues/%s.txt" % dialogue)
