@@ -39,20 +39,24 @@ def get_speakers_and_words(dialogue_file, speaker_list):
     current_speech = ""
     current_speaker = None
     for line in dialogue_file:
-        if "THE END" not in line and "-------" not in line:
-            speaker_name, speech_index = parse_speaker(line)
-            if speaker_name:
-                if current_speaker:
-                    speakers_and_words[current_speaker].append(current_speech)
-                    speaker_sequence += " " + current_speaker
+        try:
+            if "THE END" not in line and "-------" not in line:
+                speaker_name, speech_index = parse_speaker(line)
+                if speaker_name:
+                    if current_speaker:
+                        speakers_and_words[current_speaker].append(current_speech)
+                        speaker_sequence += " " + current_speaker
+                    else:
+                        speaker_sequence = speaker_name
+                    current_speech = line[speech_index:-1]
+                    current_speaker = speaker_name
                 else:
-                    speaker_sequence = speaker_name
-                current_speech = line[speech_index:-1]
-                current_speaker = speaker_name
-            else:
-                if current_speech[-1] != " ":
-                    current_speech += " "
-                current_speech += line[:-1]
+                    if current_speech[-1] != " ":
+                        current_speech += " "
+                        current_speech += line[:-1]
+        except IndexError:
+            print line
+            break
     return (speakers_and_words,speaker_sequence)
 
 def parse_standard_dialogue(file_name):
@@ -104,7 +108,7 @@ class SequenceMarkovReader(MarkovReader):
                         word_table[word] += 1
 
 def main():
-    standard_dialogues = ['cratylus', 'critias', 'crito', 'euthydemus', 'euthyphro', 'gorgias','ion','laches','meno', 'phaedrus', 'philebus','protagoras', 'sophist', 'statesman','theaetatus','timaeus']
+    standard_dialogues = ['cratylus', 'critias', 'crito', 'euthydemus', 'euthyphro', 'gorgias','ion','laches','meno', 'phaedrus', 'philebus', 'sophist', 'statesman','theaetatus','timaeus','protagoras']
     speaker_markovs = {}
     speaker_markov_readers = {}
     sequence_markov = MarkovCorpus(3)
@@ -116,14 +120,14 @@ def main():
                 speaker_markovs[speaker] = MarkovCorpus(4)
                 speaker_markov_readers[speaker] = MarkovReader(speaker_markovs[speaker])
             for words in speakers_and_words[speaker]:
-                MarkovReader(speaker_markovs[speaker]).read(words,4)
+                speaker_markov_readers[speaker].read(words,4)
+            save_file = open("datafiles/%s.dat" % speaker,'w')
+            pickle.dump(speaker_markovs[speaker],save_file)
+            save_file.close()
         sequence_markov_reader.read(speaker_sequence, 3)
     sequence_markov_reader.normalize_counts()
     sequence_file = open("datafiles/sequence.dat",'w')
     pickle.dump(sequence_markov, sequence_file)
-    for speaker in speaker_markovs:
-        save_file = open("datafiles/%s.dat" % speaker,'w')
-        pickle.dump(speaker_markovs[speaker],save_file)
 
 if __name__ == '__main__':
     main()
