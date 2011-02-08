@@ -1,5 +1,6 @@
 from markov import *
-import pickle
+import cPickle
+pickle = cPickle
 
 def is_prefix(str1,str2):
     return len(str2) >= len(str1) and str2[:len(str1)].lower() == str1.lower()
@@ -28,33 +29,34 @@ def get_speakers_and_words(dialogue_file, speaker_list):
             return (None, None)
         dot_space_index = line.index(". ")
         speaker = find_speaker(speaker_list, line[:dot_space_index])
-        if speaker:
+        if speaker and len(line) > dot_space_index + 3: #speaker is in the line and something else is too
             return (speaker, dot_space_index + 2)
         return (None, None)
     speakers_and_words = {}
     speaker_sequence = ""
     for speaker in speaker_list:
         speakers_and_words[speaker] = []
-        current_speech = ""
-        current_speaker = None
-        for line in dialogue_file:
-            if "THE END" not in line and "-------" not in line:
-                speaker_name, speech_index = parse_speaker(line)
-                if speaker_name:
-                    if current_speaker:
-                        speakers_and_words[current_speaker].append(current_speech)
-                        speaker_sequence += " " + current_speaker
-                    else:
-                        speaker_sequence = current_speaker
-                    current_speech = line[speech_index:-1]
-                    current_speaker = speaker_name
+    current_speech = ""
+    current_speaker = None
+    for line in dialogue_file:
+        if "THE END" not in line and "-------" not in line:
+            speaker_name, speech_index = parse_speaker(line)
+            if speaker_name:
+                if current_speaker:
+                    speakers_and_words[current_speaker].append(current_speech)
+                    speaker_sequence += " " + current_speaker
                 else:
-                    if current_speech[-1] != " ":
-                        current_speech += " "
-                    current_speech += line[:-1]
-    return speakers_and_words
+                    speaker_sequence = speaker_name
+                current_speech = line[speech_index:-1]
+                current_speaker = speaker_name
+            else:
+                if current_speech[-1] != " ":
+                    current_speech += " "
+                current_speech += line[:-1]
+    return (speakers_and_words,speaker_sequence)
 
 def parse_standard_dialogue(file_name):
+    print file_name
     dialogue = open(file_name,'r')
     speaker_list = get_speakers(dialogue)
     dialogue.next()
@@ -101,7 +103,7 @@ class SequenceMarkovReader(MarkovReader):
                         word_table[word] /= count
                         word_table[word] += 1
 
-if __name__ == '__main__':
+def main():
     standard_dialogues = ['cratylus', 'critias', 'crito', 'euthydemus', 'euthyphro', 'gorgias','ion','laches','meno', 'phaedrus', 'philebus','protagoras', 'sophist', 'statesman','theaetatus','timaeus']
     speaker_markovs = {}
     speaker_markov_readers = {}
@@ -122,3 +124,6 @@ if __name__ == '__main__':
     for speaker in speaker_markovs:
         save_file = open("datafiles/%s.dat" % speaker,'w')
         pickle.dump(speaker_markovs[speaker],save_file)
+
+if __name__ == '__main__':
+    main()
