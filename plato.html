@@ -5,8 +5,11 @@
     <script type="text/javascript" src="jquery.js"></script>
     <style type="text/css">
     div {
-        width:50%;
+        width:25%;
         float:left;
+    }
+    .right{
+    width:75%;
     }
     .bottom{
         width:100%;
@@ -19,17 +22,11 @@
     <h1>Roll-Your-Own Platonic Dialogue</h1>
     <h3>By <a href="http://github.com/erikkrasner">Erik</a></h3>
     <div>
-        <p>Tired of contemplating the meaning of life and the nature of life with
-        the same old boring works of Plato? Same here. That's why we're making some new ones!
-        Using the words of Plato himself (trans. Benjamin Jowett) and a
-        <a href="wikipedia">Markov text generator</a>, we've made brand-new, made-to-order Platonic
-        dialogues that'll lay the intellectual groundwork for Western civilization
-        all over again!</p>
-        <form method="post" name="entry_form">
+        <form action="/result" method="post" name="entry_form">
             <p>Title: <input type="text" name="title"></input><br>
             <p>Characters:
 	      {% for character in characters %}
-	      <span> {{character|title}} <input type="checkbox" class="{{character}}">
+	      <span> {{character|title}} <input type="checkbox" name="character" value="{{character}}">
 	      {% endfor %}
             </p>
             <p>Markov order: <input type="menu" name="order"></input>
@@ -38,6 +35,7 @@
     </div>
     <div>
         Your result:
+	{{id}}
     </div>
     <div class="bottom">
         Share<br>
