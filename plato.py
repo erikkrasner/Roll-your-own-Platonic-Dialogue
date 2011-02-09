@@ -12,6 +12,9 @@ class Dialogue(db.Model):
     characters = db.StringProperty()
     text = db.StringProperty(multiline=True)
 
+class ID(db.Model):
+    value = db.StringProperty()
+
 class MainPage(webapp.RequestHandler):
     def get(self):
         id = self.request.get('id')
@@ -22,7 +25,16 @@ class MainPage(webapp.RequestHandler):
 
 class ResultGenerator(webapp.RequestHandler):
     def getID(self):
-        return 1
+        id = db.GqlQuery("SELECT * FROM ID")
+        id =id.get()
+        if id:
+            value = int(id.value)
+        else:
+            id = ID()
+            value = 0
+        id.value = str(value + 1)
+        db.put(id)
+        return value
     def post(self):
         id = self.getID()
         self.redirect("/?id=%d" % id)
