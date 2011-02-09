@@ -36,7 +36,16 @@ class ResultGenerator(webapp.RequestHandler):
         db.put(id)
         return value
     def post(self):
+        new_dialogue = Dialogue()
         id = self.getID()
+        characters = self.request.get_all("character")
+        order = self.request.get("order")
+        text= PlatoWriter(characters).write(order)
+        new_dialogue.id = str(id)
+        new_dialogue.characters = reduce(lambda a,b: a+" "+b, characters)
+        new_dialogue.order = order
+        new_dialogue.text = text
+        new_dialogue.put()
         self.redirect("/?id=%d" % id)
 
 application = webapp.WSGIApplication([
